@@ -1,6 +1,6 @@
 #pragma once
 
-#include "detail/Interpolant.hpp"
+#include "CubicInterpolation/Interpolant.hpp"
 
 #include <string>
 #include <type_traits>
@@ -56,7 +56,7 @@ public:
    * stored in same order as axis is required.
    */
   template <typename T> inline auto prime(T x) const {
-    auto f = evaluate(x);
+    auto f = inter.evaluate(transform(def.GetAxis(), x));
     auto df = inter.prime(transform(def.GetAxis(), x));
     return back_transform_prime(def.f_trafo.get(), def.GetAxis(), f, df, x);
   }
@@ -67,18 +67,4 @@ public:
   T2 const &GetDefinition() const { return def; };
 };
 
-/**
- * @brief If the function value and the parameter except one are known, the
- * missing will be estimated.
- *
- * @param interpolant interpolant object required for calculation
- * @param val function value
- * @param x doubleing point with initial guess if 1 dimensional, else iterable
- * container with ordered function values and in place guess for to estimate
- * variable
- * @param n if multidimensional interpolant, number which variable to estimate
- */
-template <typename... Args> auto find_parameter(Args &&...args) {
-  return detail::find_parameter(std::forward<Args>(args)...);
-}
 } // namespace cubic_splines

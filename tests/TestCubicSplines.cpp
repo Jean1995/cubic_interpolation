@@ -92,7 +92,7 @@ TEST(CubicSplines, evaluate_exp_distributed_nodes) {
   auto func = [](double x) { return std::exp(x); };
   auto def = spline_def_t();
   def.f = func;
-  def.axis = std::make_unique<cubic_splines::ExpAxis<double>>(low, high, N);
+  def.axis = std::make_unique<cubic_splines::ExpM1Axis<double>>(low, high, N);
   auto spline = cubic_splines::Interpolant<spline_t>(std::move(def), "", "");
   std::uniform_real_distribution<double> dis(low, high);
   for (int i = 0; i < 10'000; ++i) {
@@ -102,14 +102,32 @@ TEST(CubicSplines, evaluate_exp_distributed_nodes) {
 }
 
 TEST(CubicSplines, evaluate_log_func_values_and_axis) {
-  size_t N = 3;
+  size_t N = 25;
   auto low = 1e1f;
+  auto high = 1e4f;
+  auto def = spline_def_t();
+  auto func = [](double x) { return x*x*std::log(x); };
+  def.f = func;
+  def.f_trafo = std::make_unique<cubic_splines::ExpM1Axis<double>>(1, 0);
+  def.axis = std::make_unique<cubic_splines::ExpM1Axis<double>>(low, high, N);
+  auto spline = cubic_splines::Interpolant<spline_t>(std::move(def), "", "");
+  std::uniform_real_distribution<double> dis(low, high);
+  for (int i = 0; i < 10'000; ++i) {
+    auto x = dis(gen);
+    EXPECT_NEAR(func(x), spline.evaluate(x), std::abs(func(x)) * 1e-3);
+  }
+}
+
+TEST(CubicSplines, evaluate_log_func_values_and_axis_trivial_integrand) {
+  size_t N = 3;
+  auto low = 1e0f;
   auto high = 1e2f;
   auto def = spline_def_t();
-  auto func = [](double x) { return std::pow(x, 10); };
+  // this function should be a straight line in the transformed space
+  auto func = [](double x) { return std::pow(x+1, 10); };
   def.f = func;
-  def.f_trafo = std::make_unique<cubic_splines::ExpAxis<double>>(1, 0);
-  def.axis = std::make_unique<cubic_splines::ExpAxis<double>>(low, high, N);
+  def.f_trafo = std::make_unique<cubic_splines::ExpM1Axis<double>>(1, 0);
+  def.axis = std::make_unique<cubic_splines::ExpM1Axis<double>>(low, high, N);
   auto spline = cubic_splines::Interpolant<spline_t>(std::move(def), "", "");
   std::uniform_real_distribution<double> dis(low, high);
   for (int i = 0; i < 10'000; ++i) {
@@ -143,7 +161,7 @@ TEST(CubicSplines, prime_x_trafo) {
   auto func = [](double x) { return x * x + x + 1; };
   auto df_dx = [](double x) { return 2 * x + 1; };
   def.f = func;
-  def.axis = std::make_unique<cubic_splines::ExpAxis<double>>(low, high, N);
+  def.axis = std::make_unique<cubic_splines::ExpM1Axis<double>>(low, high, N);
   auto spline = cubic_splines::Interpolant<spline_t>(std::move(def), "", "");
   std::uniform_real_distribution<double> dis(low, high);
   for (int i = 0; i < 10'000; ++i) {
@@ -160,7 +178,7 @@ TEST(CubicSplines, prime_y_trafo) {
   auto func = [](double x) { return x * x + x + 1; };
   auto df_dx = [](double x) { return 2 * x + 1; };
   def.f = func;
-  def.f_trafo = std::make_unique<cubic_splines::ExpAxis<double>>(1, 0);
+  def.f_trafo = std::make_unique<cubic_splines::ExpM1Axis<double>>(1, 0);
   def.axis = std::make_unique<cubic_splines::LinAxis<double>>(low, high, N);
   auto spline = cubic_splines::Interpolant<spline_t>(std::move(def), "", "");
   std::uniform_real_distribution<double> dis(low, high);

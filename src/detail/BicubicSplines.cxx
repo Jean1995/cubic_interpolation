@@ -1,5 +1,5 @@
-#include "../BicubicSplines.h"
-#include "../InterpolantBuilder.h"
+#include "CubicInterpolation/BicubicSplines.h"
+#include "CubicInterpolation/InterpolantBuilder.h"
 
 #include <Eigen/Dense>
 #include <boost/math/differentiation/finite_difference.hpp>
@@ -58,7 +58,10 @@ template <typename T> struct BicubicSplines<T>::RuntimeData {
     return ::std::vector<T>(m.data(), m.data() + m.rows() * m.cols());
   }
 
-  auto get_dimensions() const { return std::array<long int, 2>{y.rows(), y.cols()}; }
+  auto get_dimensions() const {
+    return std::array<long int, 2>{static_cast<long int>(y.rows()),
+                                   static_cast<long int>(y.cols())};
+  }
 
   StorageData to_storage_data() const;
 };
@@ -289,3 +292,6 @@ template <typename T> T BicubicSplines<T>::double_prime(T x0, T x1) const {
       x0);
 }
 } // namespace cubic_splines
+
+template class cubic_splines::BicubicSplines<double>;
+template class cubic_splines::BicubicSplines<float>;

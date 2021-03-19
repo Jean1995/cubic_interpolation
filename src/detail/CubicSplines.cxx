@@ -1,5 +1,5 @@
-#include "../CubicSplines.h"
-#include "../InterpolantBuilder.h"
+#include "CubicInterpolation/CubicSplines.h"
+#include "CubicInterpolation/InterpolantBuilder.h"
 
 #include <boost/math/differentiation/finite_difference.hpp>
 #include <boost/math/interpolators/cardinal_cubic_b_spline.hpp>
@@ -101,5 +101,7 @@ template <typename T> T CubicSplines<T>::prime(T x) const {
 template <typename T> T CubicSplines<T>::double_prime(T x) const {
   return data->spline.double_prime(x);
 };
-
 } // namespace cubic_splines
+
+template class cubic_splines::CubicSplines<float>;
+template class cubic_splines::CubicSplines<double>;
